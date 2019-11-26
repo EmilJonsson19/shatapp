@@ -1,6 +1,7 @@
 from appJar import gui
 import socket
 from threading import Thread
+import pickle
 
 public_chat_list= []
 list_of_users= ["all"]
@@ -13,11 +14,15 @@ def connect_to_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as mySocket:
         mySocket.connect((HOST_ip, PORT))
         print("connected to server and thread for listening established")
+        alias = app.getEntry("namn")
+        alias= (f"#{alias}")
+        send(alias,mySocket)
         
         while True:
             listen_thread = Thread(target=recieve, args=(mySocket,))
             listen_thread.start()
-            
+
+
             
 def send(message, mySocket):
 
@@ -32,7 +37,23 @@ def recieve(mySocket):
         data = mySocket.recv(1024).decode('utf-8')
         if not data:
             break
-        app.updateListBox("chat",public_chat_list)
+       
+        data = format(data)
+        if data[0] =="#":
+            namn=data.replace("#","")
+            message= (f"{namn} has connected to server.")
+            app.addListItem("chat",message)
+        if data[0] =="!":
+            data= data.strip("!")
+            print(data)
+            if data not in list_of_users:
+                list_of_users.append(data)
+                app.changeOptionBox("user",list_of_users)
+        
+        else:
+            data = data.replace("%","")
+            public_chat_list.append(data)
+            app.updateListBox("chat",public_chat_list)
 
 
     
@@ -40,9 +61,6 @@ def recieve(mySocket):
 def btncallback(btn):
 
     if btn == "connect":
-        alias = app.getEntry("namn")
-        list_of_users.append(alias)
-        app.changeOptionBox("user", list_of_users)
         app.thread(connect_to_server)
     if btn == "quit":
         send("close", mySocket)
@@ -51,11 +69,16 @@ def btncallback(btn):
         message = app.getEntry("write")
         current_option = app.getOptionBox("user")
         if current_option !="all":
-            print("it works")
-        public_chat_list.append(message)
-        send(message, mySocket)
-        app.clearEntry("write")
-        
+            alias= app.getEntry("namn")
+            header= (f"{current_option}@{alias}@{message}")
+            send(header,mySocket)
+            app.clearEntry("write")
+        else:
+            alias = app.getEntry("namn")
+            header=(f"%{alias}: {message}")
+            send(header, mySocket)
+            app.clearEntry("write")
+            
         
 
 

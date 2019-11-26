@@ -2,7 +2,9 @@ import socket
 from appJar import gui
 from threading import Thread
 
+
 dict_of_users = {}
+list_of_users= []
 
 
 def server_gui():
@@ -17,21 +19,25 @@ def listen_bind(HOST, PORT):
     print('listening...')
     while True:
         conn, adress = mySock.accept()
-        print(conn, adress)
-        dict_of_users[conn] = adress
+        print(conn,adress)
         recive_thread = Thread(target=recive_from_user, args=(conn,))
         recive_thread.start()
 
     return recive_thread
-
+#bind dict_of_users[conn]=namn
+#skicka med aliasnamn tsm när man connectar till servern
+#använd sig utav header. fånga upp alias från klient med ett @
+#skicka vidare till all,det namnet och dess connection(socket)
 
 def send_all(data):
     for key in dict_of_users:
         key.sendall(data)
 
 
-def send_private():
-    pass
+def send_private(namn,connection,msg_from,message):
+    medelande= bytes((f"{msg_from}:{message}"),'utf-8')
+    connection.sendall(medelande)
+    
 
 
 def recive_from_user(conn):
@@ -40,8 +46,28 @@ def recive_from_user(conn):
         if not data:
             break
         data = format(data)
-        returnvalue = data.encode('utf-8')
-        send_all(returnvalue)
+        
+        if data[0] =="#":
+            namn = data.strip("#")
+            dict_of_users[conn]=namn    
+            for key in dict_of_users:
+                for x in dict_of_users:
+                    update_name = bytes((f"!{dict_of_users[x]}"),'utf-8')
+                    key.sendall(update_name)
+
+    
+        if "@" in data:
+            info=data.split("@")
+            namn=info[0]
+            msg_from=info[1]
+            message= info[2]
+            for connection, name in dict_of_users.items():
+                if name == namn:
+                    send_private(namn,connection,msg_from,message)
+
+        if data[0] =="%":
+            returnvalue = data.encode('utf-8')
+            send_all(returnvalue)
 
 
 def main():
@@ -51,9 +77,8 @@ def main():
     print("Hostname :  ", HOST_name)
     print("IP : ", HOST_ip)
 
-    recive_thread = listen_bind(HOST_ip, PORT)
-    print(recive_thread.is_alive())
-    recive_thread.join()
+    listen_bind(HOST_ip, PORT)
+    
 
 
 if __name__ == "__main__":

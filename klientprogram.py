@@ -1,28 +1,15 @@
 from appJar import gui
 import socket
 from threading import Thread
+import sys
 
 chat_list= []
 list_of_users= ["all"]
+global stop_threads
+stop_threads = False
+global stop_recieve
+stop_recieve = False
 
-def connect_to_server():
-    HOST_name = socket.gethostname()
-    HOST_ip = socket.gethostbyname(HOST_name)
-    PORT = 65432
-    global mySocket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as mySocket:
-        mySocket.connect((HOST_ip, PORT))
-        print("connected to server and thread for listening established")
-        alias = app.getEntry("namn")
-        alias= (f"#{alias}")
-        send(alias,mySocket)
-        
-        while True:
-            listen_thread = Thread(target=recieve, args=(mySocket,))
-            listen_thread.start()
-
-
-            
 def send(message, mySocket):
 
     b = bytes(message, 'utf-8')
@@ -59,21 +46,34 @@ def recieve(mySocket):
             chat_list.append(data)
             app.updateListBox("chat",chat_list)
 
-
-    
-def check_if_duplicates(listan):
+        if "&&close" in data:
+            print("threds stopping")
+            global stop_threads
+            stop_threads= True
+            global stop_recieve
+            stop_recieve= True
+            
+        
+        if stop_recieve:
+            break
+    print("threds stopping")
+    app.stop()
+    return
+def check_if_duplicates(listan): #check if listvalues got duplicates by set
     new_set= set(listan)
-    print(new_set)
     new_list=list(new_set)
     return new_list
 
 def btncallback(btn):    #buttoncallbackfunkition
 
     if btn == "connect":
-        app.thread(connect_to_server)
+        alias = app.getEntry("namn")
+        alias= (f"#{alias}")
+        send(alias,mySocket)
+        
     if btn == "quit":
-        send("close", mySocket)
-        mySocket.close()
+        send("&&close", mySocket)
+        
     if btn == "send":
         message = app.getEntry("write")         
         current_option = app.getOptionBox("user")
@@ -122,4 +122,25 @@ app.addButtons(["send", "ABC", "abc"], [
     btncallback, btncallback, btncallback])
 app.stopFrame()
 
-app.go()
+
+def main():
+    HOST_name = socket.gethostname()
+    HOST_ip = socket.gethostbyname(HOST_name)
+    PORT = 65432
+    global mySocket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as mySocket:
+        mySocket.connect((HOST_ip, PORT))
+        print("connected to server and thread for listening established")
+        
+        listen_thread = Thread(target=recieve, args=(mySocket,))
+        listen_thread.start()
+        app.go()
+    
+    mySocket.close()
+    
+ 
+
+
+
+if __name__ == "__main__":
+    main()

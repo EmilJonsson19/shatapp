@@ -18,10 +18,6 @@ def listen_bind(HOST, PORT):
         recive_thread.start()
 
     return recive_thread
-#bind dict_of_users[conn]=namn
-#skicka med aliasnamn tsm när man connectar till servern
-#använd sig utav header. fånga upp alias från klient med ett @
-#skicka vidare till all,det namnet och dess connection(socket)
 
 def send_all(data):
     for key in dict_of_users:
@@ -32,7 +28,10 @@ def send_private(namn,connection,msg_from,message):
     medelande= bytes((f"(pm){msg_from}:{message}"),'utf-8')
     connection.sendall(medelande)
     
-
+def close_klient(data,conn):
+    data= bytes(data,'utf-8')
+    conn.sendall(data)
+    
 
 def recive_from_user(conn):
     while True:
@@ -64,6 +63,12 @@ def recive_from_user(conn):
         if data[0] =="%":
             returnvalue = data.encode('utf-8')
             send_all(returnvalue)
+        
+        if "&&close" in data:
+            
+            close_klient("&&close",conn)
+            
+            
 
 
 def main():

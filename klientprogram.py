@@ -1,9 +1,8 @@
 from appJar import gui
 import socket
 from threading import Thread
-import pickle
 
-public_chat_list= []
+chat_list= []
 list_of_users= ["all"]
 
 def connect_to_server():
@@ -31,34 +30,44 @@ def send(message, mySocket):
 
 
 
-
 def recieve(mySocket):
     while True:
-        data = mySocket.recv(1024).decode('utf-8')
+        data = mySocket.recv(256).decode('utf-8')
         if not data:
             break
-       
         data = format(data)
-        if data[0] =="#":
-            namn=data.replace("#","")
-            message= (f"{namn} has connected to server.")
-            app.addListItem("chat",message)
+
         if data[0] =="!":
-            data= data.strip("!")
-            print(data)
-            if data not in list_of_users:
-                list_of_users.append(data)
-                app.changeOptionBox("user",list_of_users)
+            info= data.strip("!")
+            if info not in list_of_users:
+                list_of_users.append(info)
+                message= (f"{info} has connected to server.")
+                chat_list.append(message)
+                app.updateListBox("chat",chat_list)
+                list_of_users_without_duplicates = check_if_duplicates(list_of_users)
+                app.changeOptionBox("user",list_of_users_without_duplicates)
+
+        if "(pm)" in data:
+            private_message = data.strip("#")
+            print(private_message)
+            chat_list.append(private_message)
+            app.updateListBox("chat",chat_list)
         
-        else:
+        
+        if data[0]== "%":
             data = data.replace("%","")
-            public_chat_list.append(data)
-            app.updateListBox("chat",public_chat_list)
+            chat_list.append(data)
+            app.updateListBox("chat",chat_list)
 
 
     
+def check_if_duplicates(listan):
+    new_set= set(listan)
+    print(new_set)
+    new_list=list(new_set)
+    return new_list
 
-def btncallback(btn):
+def btncallback(btn):    #buttoncallbackfunkition
 
     if btn == "connect":
         app.thread(connect_to_server)
@@ -66,7 +75,7 @@ def btncallback(btn):
         send("close", mySocket)
         mySocket.close()
     if btn == "send":
-        message = app.getEntry("write")
+        message = app.getEntry("write")         
         current_option = app.getOptionBox("user")
         if current_option !="all":
             alias= app.getEntry("namn")
@@ -81,7 +90,7 @@ def btncallback(btn):
             
         
 
-
+#skapar GUI
 app = gui("ShatApp", "500x500")
 app.setBg("lightslategrey")
 app.addLabel(

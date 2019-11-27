@@ -1,19 +1,13 @@
 import socket
 from appJar import gui
 from threading import Thread
-
+import time
 
 dict_of_users = {}
 list_of_users= []
 
-
-def server_gui():
-    pass
-
-
 def listen_bind(HOST, PORT):
     mySock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     mySock.bind((HOST, PORT))
     mySock.listen()
     print('listening...')
@@ -35,25 +29,27 @@ def send_all(data):
 
 
 def send_private(namn,connection,msg_from,message):
-    medelande= bytes((f"{msg_from}:{message}"),'utf-8')
+    medelande= bytes((f"(pm){msg_from}:{message}"),'utf-8')
     connection.sendall(medelande)
     
 
 
 def recive_from_user(conn):
     while True:
-        data = conn.recv(1024).decode('utf-8')
+        data = conn.recv(256).decode('utf-8')
         if not data:
             break
         data = format(data)
         
         if data[0] =="#":
             namn = data.strip("#")
-            dict_of_users[conn]=namn    
+            namn= namn.strip("!")
+            dict_of_users[conn]=namn   
             for key in dict_of_users:
                 for x in dict_of_users:
                     update_name = bytes((f"!{dict_of_users[x]}"),'utf-8')
                     key.sendall(update_name)
+                    time.sleep(0.5)
 
     
         if "@" in data:
@@ -63,7 +59,7 @@ def recive_from_user(conn):
             message= info[2]
             for connection, name in dict_of_users.items():
                 if name == namn:
-                    send_private(namn,connection,msg_from,message)
+                    send_private(namn, connection, msg_from, message)
 
         if data[0] =="%":
             returnvalue = data.encode('utf-8')

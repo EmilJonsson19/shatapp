@@ -33,7 +33,6 @@ def recieve(mySocket):
 
         if "(pm)" in data:
             private_message = data.strip("#")
-            print(private_message)
             chat_list.append(private_message)
             app.updateListBox("chat",chat_list)
         

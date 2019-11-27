@@ -64,8 +64,8 @@ def recive_from_user(conn):
             send_all(returnvalue)
         
         if "&&close" in data:
-            
             close_klient("&&close",conn)
+            del dict_of_users[conn]
             
             
 

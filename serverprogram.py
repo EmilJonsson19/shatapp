@@ -49,7 +49,7 @@ def recive_from_user(conn):
                 for x in dict_of_users:
                     update_name = bytes((f"!{dict_of_users[x]}"),'utf-8')
                     key.sendall(update_name)
-                    time.sleep(0.5)
+                    time.sleep(0.1)
 
     
         if "@" in data:

@@ -33,7 +33,7 @@ def close_klient(data,conn):
     conn.sendall(data)
     
 
-def recive_from_user(conn):
+def recive_from_user(conn): 
     while True:
         data = conn.recv(256).decode('utf-8')
         if not data:
@@ -43,7 +43,7 @@ def recive_from_user(conn):
         if data[0] =="#":
             namn = data.strip("#")
             namn= namn.strip("!")
-            dict_of_users[conn]=namn   
+            dict_of_users[conn]=namn 
             for key in dict_of_users:
                 for x in dict_of_users:
                     update_name = bytes((f"!{dict_of_users[x]}"),'utf-8')
@@ -64,7 +64,7 @@ def recive_from_user(conn):
             send_all(returnvalue)
         
         if "&&close" in data:
-            
+            del dict_of_users[conn]
             close_klient("&&close",conn)
             
             

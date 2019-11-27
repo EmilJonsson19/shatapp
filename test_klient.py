@@ -1,10 +1,11 @@
 import unittest
-
+import socket
+import klientprogram as kp
 
 
 class testCases(unittest.TestCase):
 
-    def setUp(self):
+    """def setUp(self):
         #öppna connection mot server
         HOST_name = socket.gethostname()
         HOST_ip = socket.gethostbyname(HOST_name)
@@ -12,30 +13,39 @@ class testCases(unittest.TestCase):
         global mySocket
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as mySocket:
             mySocket.connect((HOST_ip, PORT))
-            while True:
-                listen_thread = Thread(target=recieve, args=(mySocket,))
-                listen_thread.start()
-            
-    def recieve(mySocket):
-        while True:
+            global message
+            message= '%' + 'hejsan'
+            b = bytes(message, 'utf-8')
+            mySocket.sendall(b)
             data = mySocket.recv(1024).decode('utf-8')
-            if not data:
-                break
-            print(data)
-            global answer
-            answer= data
+            if data[0]=="%":
+                print(data)
+                global answer
+                answer=data
+            
+            mySocket.close()
+        """
+                
+                    
+   
+
+    def test_check_if_duplicates(self):
+        listan= [1,2,3]
+        listan2= [1,2,3,1]
+        result= kp.check_if_duplicates(listan2)
+        print(result)
+        self.assertEqual(result,listan)
 
 
-
-    def test_send_msg(self):
+    #def test_send_msg(self):
         #skicka ett meddelande till server o få samma tillbaks
-        message= '%' + 'hejsan'
-        b = bytes(message, 'utf-8')
-        mySocket.sendall(b)
+       
+        #self.assertEqual(answer,message)
 
 
-    def tearDown(self):
+    #def tearDown(self):
         #close connection
+        #mySocket.close()
      
 
 

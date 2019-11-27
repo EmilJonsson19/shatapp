@@ -50,7 +50,6 @@ def recive_from_user(conn):
                     key.sendall(update_name)
                     time.sleep(0.1)
 
-    
         if "@" in data:
             info=data.split("@")
             namn=info[0]

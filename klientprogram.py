@@ -5,10 +5,7 @@ import sys
 
 chat_list= []
 list_of_users= ["all"]
-global stop_threads
-stop_threads = False
-global stop_recieve
-stop_recieve = False
+
 
 def send(message, mySocket):
 
@@ -48,17 +45,11 @@ def recieve(mySocket):
 
         if "&&close" in data:
             print("threds stopping")
-            global stop_threads
-            stop_threads= True
-            global stop_recieve
-            stop_recieve= True
-            
         
-        if stop_recieve:
             break
-    print("threds stopping")
-    app.stop()
-    return
+        
+
+
 def check_if_duplicates(listan): #check if listvalues got duplicates by set
     new_set= set(listan)
     new_list=list(new_set)
@@ -73,6 +64,7 @@ def btncallback(btn):    #buttoncallbackfunkition
         
     if btn == "quit":
         send("&&close", mySocket)
+        app.stop()
         
     if btn == "send":
         message = app.getEntry("write")         
@@ -135,8 +127,7 @@ def main():
         listen_thread = Thread(target=recieve, args=(mySocket,))
         listen_thread.start()
         app.go()
-    
-    mySocket.close()
+        listen_thread.join()
     
  
 
